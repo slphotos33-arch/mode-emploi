@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon mode d'emploi — Création de Couleur</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --teal:#2E8B80;--teal-d:#1A5C55;--teal-l:#E6F5F3;
+  --coral:#D95F50;--coral-l:#FDECEA;
+  --gold:#B07A10;--gold-l:#FDF5E0;
+  --violet:#5A4ABD;--violet-l:#EEEAF8;
+  --green:#2E8A50;--green-l:#E8F5EE;
+  --grey-f:#1A202C;--grey-m:#4A5568;--grey-l:#F7FAFC;--grey-b:#A0AEC0;
+  --white:#ffffff;
+  --font: system-ui, -apple-system, 'Segoe UI', Verdana, sans-serif;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#EDF2F7;color:var(--grey-f);line-height:1.65;font-size:16px;}
+
+/* ── HEADER ── */
+header{background:var(--teal-d);color:white;padding:16px 20px 0;}
+header h1{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;}
+header p{font-size:.88rem;opacity:.8;margin-top:3px;padding-bottom:10px;}
+.pb-wrap{background:rgba(255,255,255,.2);height:6px;}
+.pb{background:var(--gold);height:6px;width:0%;transition:width .4s;}
+.pills{display:flex;gap:4px;padding:8px 20px;overflow-x:auto;scrollbar-width:none;background:var(--teal-d);}
+.pills::-webkit-scrollbar{display:none;}
+.pill{flex-shrink:0;background:rgba(255,255,255,.15);border:none;color:rgba(255,255,255,.8);
+      font-family:var(--font);font-size:.72rem;font-weight:600;padding:5px 12px;
+      border-radius:20px;cursor:pointer;transition:all .2s;}
+.pill.active{background:white;color:var(--teal-d);}
+.pill.done{background:rgba(255,255,255,.28);color:white;}
+
+/* ── MAIN ── */
+main{max-width:660px;margin:0 auto;padding:22px 16px 24px;}
+
+/* ── SECTIONS ── */
+.sec{display:none;}
+.sec.active{display:block;animation:fi .25s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.sh{color:white;border-radius:var(--radius) var(--radius) 0 0;padding:18px 20px 14px;}
+.sh .em{font-size:2rem;display:block;margin-bottom:6px;}
+.sh h2{font-size:1.15rem;font-weight:800;}
+.sh p{font-size:.88rem;opacity:.88;margin-top:5px;line-height:1.5;}
+.sb{background:white;border-radius:0 0 var(--radius) var(--radius);
+    padding:22px 20px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:12px;}
+
+/* ── QUESTIONS ── */
+.qb{margin-bottom:24px;}
+.qb:last-child{margin-bottom:0;}
+.ql{font-weight:700;font-size:1rem;color:var(--grey-f);margin-bottom:8px;display:block;line-height:1.4;}
+.qh{font-size:.85rem;color:var(--grey-m);font-style:italic;margin-bottom:10px;display:block;line-height:1.5;}
+.qopt{font-size:.72rem;background:var(--grey-l);color:var(--grey-m);
+      padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:500;}
+
+input[type=text],textarea{
+  width:100%;border:2px solid #CBD5E0;border-radius:8px;
+  padding:11px 14px;font-family:var(--font);font-size:1rem;
+  color:var(--grey-f);background:var(--grey-l);line-height:1.5;
+}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--teal);background:white;}
+textarea{resize:vertical;min-height:80px;}
+
+/* ── CHECKBOXES ── */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.cg.c1{grid-template-columns:1fr;}
+.ci{display:flex;align-items:flex-start;gap:10px;background:var(--grey-l);
+    border:2px solid transparent;border-radius:8px;padding:10px 13px;
+    cursor:pointer;user-select:none;transition:all .15s;}
+.ci:hover{border-color:#A0AEC0;background:#EDF2F7;}
+.ci.checked{background:var(--teal-l);border-color:var(--teal);}
+.ci input{display:none;}
+.cb{width:22px;height:22px;border:2px solid #A0AEC0;border-radius:5px;flex-shrink:0;
+    margin-top:1px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;transition:all .15s;color:white;}
+.ci.checked .cb{background:var(--teal);border-color:var(--teal);}
+.ci.checked .cb::after{content:'✓';}
+.cl{font-size:.92rem;line-height:1.45;font-weight:500;}
+
+.ci.violet.checked{background:var(--violet-l);border-color:var(--violet);}
+.ci.violet.checked .cb{background:var(--violet);border-color:var(--violet);}
+.ci.coral.checked{background:var(--coral-l);border-color:var(--coral);}
+.ci.coral.checked .cb{background:var(--coral);border-color:var(--coral);}
+.ci.gold.checked{background:var(--gold-l);border-color:var(--gold);}
+.ci.gold.checked .cb{background:var(--gold);border-color:var(--gold);}
+.ci.green.checked{background:var(--green-l);border-color:var(--green);}
+.ci.green.checked .cb{background:var(--green);border-color:var(--green);}
+
+/* ── INTENSITE ── */
+.iscale{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:9px;}
+.ibtn{width:46px;height:46px;border:2px solid #CBD5E0;border-radius:50%;
+      background:white;font-family:var(--font);font-size:1.05rem;font-weight:700;
+      color:var(--grey-m);cursor:pointer;transition:all .15s;display:flex;
+      align-items:center;justify-content:center;}
+.ibtn:hover{border-color:var(--gold);color:var(--gold);}
+.ibtn.sel{background:var(--gold);border-color:var(--gold);color:white;}
+.ilabels{display:flex;justify-content:space-between;font-size:.78rem;
+         color:var(--grey-m);margin-top:5px;width:235px;}
+
+/* ── INTERET BLOCK ── */
+.iblock{background:var(--gold-l);border-radius:var(--radius);padding:16px;
+        margin-bottom:10px;border-left:5px solid var(--gold);}
+.iblock .ql{color:var(--gold);}
+
+/* ── BOUTONS NAV ── */
+.nav-row{display:flex;gap:12px;margin-top:22px;}
+.btn{font-family:var(--font);font-size:1rem;font-weight:700;
+     padding:14px 22px;border-radius:var(--radius);border:none;
+     cursor:pointer;flex:1;transition:all .2s;line-height:1;}
+.btn-prev{background:#E2E8F0;color:var(--grey-m);}
+.btn-prev:hover{background:#CBD5E0;color:var(--grey-f);}
+.btn-next{background:var(--teal);color:white;}
+.btn-next:hover{background:var(--teal-d);}
+.btn-gen{background:var(--gold);color:white;}
+.btn-gen:hover{background:#8C6210;}
+
+/* ── INTRO ── */
+.intro-hdr{background:var(--teal-d);border-radius:var(--radius) var(--radius) 0 0;padding:26px 22px;color:white;}
+.intro-hdr h2{font-size:1.5rem;font-weight:800;margin-bottom:8px;}
+.intro-hdr p{opacity:.88;font-size:.95rem;line-height:1.65;}
+.intro-body{background:white;border-radius:0 0 var(--radius) var(--radius);
+            padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:12px;}
+.intro-body p{margin-bottom:14px;color:var(--grey-f);line-height:1.7;font-size:.95rem;}
+.note{background:var(--teal-l);border-left:5px solid var(--teal);border-radius:8px;
+      padding:13px 16px;font-size:.9rem;line-height:1.6;}
+.note-warn{background:#FFFBEB;border-left:5px solid var(--gold);border-radius:8px;
+           padding:13px 16px;font-size:.88rem;line-height:1.6;margin-top:12px;color:var(--grey-f);}
+
+/* ── FINAL ── */
+.final-hdr{background:var(--teal-d);border-radius:var(--radius);padding:20px 22px;color:white;margin-bottom:16px;}
+.final-hdr span{font-size:2rem;display:block;margin-bottom:6px;}
+.final-hdr h2{font-size:1.1rem;font-weight:700;}
+.final-body{background:white;border-radius:var(--radius);padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.gbtn{display:block;width:100%;font-family:var(--font);font-size:1rem;font-weight:700;
+      padding:16px 20px;border-radius:var(--radius);border:none;cursor:pointer;
+      margin-bottom:11px;transition:all .2s;text-align:center;line-height:1;}
+.gbtn:last-of-type{margin-bottom:0;}
+.gbtn-carte{background:var(--teal);color:white;}
+.gbtn-carte:hover{background:var(--teal-d);}
+.gbtn-detail{background:var(--violet);color:white;}
+.gbtn-detail:hover{background:#433A9A;}
+.gbtn-both{background:var(--gold);color:white;}
+.gbtn-both:hover{background:#8C6210;}
+.privacy{background:var(--green-l);border-left:5px solid var(--green);border-radius:8px;
+         padding:13px 16px;font-size:.88rem;margin-top:18px;line-height:1.6;}
+.restart-btn{background:none;border:none;color:var(--grey-m);font-family:var(--font);
+             font-size:.88rem;cursor:pointer;text-decoration:underline;
+             margin-top:16px;display:block;text-align:center;width:100%;}
+
+/* ── SEPARATEUR ── */
+.sep{height:1px;background:#E2E8F0;margin:20px 0;}
+
+@media(max-width:520px){
+  .cg{grid-template-columns:1fr;}
+  .nav-row{flex-direction:column;}
+  body{font-size:15px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧩 Mon mode d'emploi</h1>
+  <p>Création de Couleur — Questionnaire de connaissance de soi</p>
+  <div class="pb-wrap"><div class="pb" id="pb"></div></div>
+  <div class="pills" id="pills"></div>
+</header>
+
+<main>
+
+<!-- ═══ INTRO ═══ -->
+<div class="sec active" id="s0">
+  <div class="intro-hdr">
+    <h2>👋 Bienvenue</h2>
+    <p>Ce questionnaire te permet de créer un document qui explique comment tu fonctionnes — pour faciliter tes interactions sociales et te faire comprendre plus facilement.</p>
+  </div>
+  <div class="intro-body">
+    <p>Tu peux le remplir <strong>seul·e, à ton rythme</strong>. Tu n'es pas obligé·e de tout remplir — laisse de côté ce qui ne te convient pas.</p>
+    <p>À la fin, tu choisiras entre :</p>
+    <p>🃏 <strong>Une carte courte</strong> — à imprimer et plastifier, lisible en quelques secondes<br>
+    📄 <strong>Un mode d'emploi détaillé</strong> — pour les personnes qui veulent vraiment te connaître</p>
+    <div class="note">🔒 <strong>Tes données restent sur ton appareil.</strong><br>Aucune information n'est envoyée ni stockée — ni sur ce site, ni sur un serveur. Tout se passe dans ton navigateur uniquement.</div>
+    <div class="note-warn">⚠️ <strong>Important :</strong> ne ferme pas l'onglet pendant que tu remplis le questionnaire. Tes réponses ne sont pas sauvegardées automatiquement.</div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-next" onclick="goTo(1)">Commencer →</button>
+  </div>
+</div>
+
+<!-- ═══ QUI JE SUIS ═══ -->
+<div class="sec" id="s1">
+  <div class="sh" style="background:var(--teal-d)">
+    <span class="em">👤</span>
+    <h2>Qui je suis</h2>
+    <p>Réponds uniquement à ce qui te convient.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">Prénom ou pseudo <span class="qopt">facultatif</span></label>
+      <input type="text" id="prenom" placeholder="Comment tu veux qu'on t'appelle…">
+    </div>
+    <div class="qb">
+      <label class="ql">Âge <span class="qopt">facultatif</span></label>
+      <input type="text" id="age" placeholder="…">
+    </div>
+    <div class="qb">
+      <label class="ql">Comment tu préfères qu'on s'adresse à toi</label>
+      <span class="qh">Ex : de façon directe, avec humour, sans diminutifs, avec mon prénom uniquement…</span>
+      <textarea id="adresse" rows="2" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">En une ou deux phrases, comment tu te décrirais ?</label>
+      <textarea id="description" rows="3" placeholder="…"></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(0)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(2)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ GENRE ═══ -->
+<div class="sec" id="s2">
+  <div class="sh" style="background:var(--violet)">
+    <span class="em">🌈</span>
+    <h2>Mon genre et mes pronoms <span style="font-weight:400;font-size:.85rem;opacity:.88">— facultatif</span></h2>
+    <p>Cette section est facultative. Elle existe parce que savoir comment s'adresser à quelqu'un, c'est une forme de respect.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">Mon genre</label>
+      <div class="cg" id="g-genre"></div>
+      <input type="text" id="genre-autre" placeholder="Préciser si besoin…" style="margin-top:10px">
+    </div>
+    <div class="sep"></div>
+    <div class="qb">
+      <label class="ql">Les pronoms que je préfère</label>
+      <div class="cg" id="g-pronoms"></div>
+      <input type="text" id="pronoms-autre" placeholder="Précisions si besoin…" style="margin-top:10px">
+    </div>
+    <div class="sep"></div>
+    <div class="qb">
+      <label class="ql">Ce qui m'aide par rapport à mon genre</label>
+      <div class="cg" id="g-genre-aide"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce que tu voudrais que les autres sachent <span class="qopt">facultatif</span></label>
+      <textarea id="genre-libre" rows="2" placeholder="…"></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(1)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(3)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ ORIENTATION ═══ -->
+<div class="sec" id="s3">
+  <div class="sh" style="background:var(--violet)">
+    <span class="em">💜</span>
+    <h2>Mon orientation affective et romantique <span style="font-weight:400;font-size:.85rem;opacity:.88">— facultatif</span></h2>
+    <p>Section distincte du genre. Tu peux la partager à ta façon, ou ne rien mettre.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">Mon orientation affective ou romantique <span class="qopt">facultatif</span></label>
+      <span class="qh">Ex : hétérosexuel·le, homosexuel·le, bisexuel·le, asexuel·le, aromantique, en exploration… à ta façon.</span>
+      <textarea id="orientation" rows="2" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce que tu veux que les autres sachent à ce sujet <span class="qopt">facultatif</span></label>
+      <textarea id="orient-info" rows="2" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Afficher cette information dans mon document ?</label>
+      <div class="cg c1" id="g-orient-afficher"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(2)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(4)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ INTERETS ═══ -->
+<div class="sec" id="s4">
+  <div class="sh" style="background:var(--gold)">
+    <span class="em">⭐</span>
+    <h2>Mes intérêts et passions</h2>
+    <p>Ce qui te passionne — sujets, activités, univers, collections… Pas de limite.</p>
+  </div>
+  <div class="sb">
+    <div id="interests-wrap"></div>
+    <button type="button" onclick="addInterest()" style="
+      background:none;border:2px dashed #CBD5E0;border-radius:8px;
+      padding:11px;width:100%;font-family:var(--font);font-size:.92rem;
+      color:var(--grey-m);cursor:pointer;margin-bottom:18px;transition:all .2s;font-weight:600;">
+      + Ajouter un intérêt
+    </button>
+    <div class="qb">
+      <label class="ql">Ce que j'aime partager sur mes passions</label>
+      <textarea id="partager" rows="2" placeholder="Ex : des anecdotes, des recommandations, des infos…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce que je n'aime pas qu'on dise ou fasse sur mes passions</label>
+      <textarea id="napas" rows="2" placeholder="Ex : minimiser, couper quand je suis lancé·e, comparer…"></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(3)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(5)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ SENSORIEL ═══ -->
+<div class="sec" id="s5">
+  <div class="sh" style="background:var(--coral)">
+    <span class="em">〰️</span>
+    <h2>Mon profil sensoriel</h2>
+    <p>Coche ce qui correspond. Tu peux cocher plusieurs cases. Rien n'est obligatoire.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">👂 Le bruit et le son</label>
+      <div class="cg" id="g-son"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
+        <input type="text" id="sons-diff" placeholder="Sons difficiles pour moi…">
+        <input type="text" id="sons-bien" placeholder="Sons qui me font du bien…">
+      </div>
+    </div>
+    <div class="qb">
+      <label class="ql">💡 La lumière et le visuel</label>
+      <div class="cg" id="g-visuel"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">🤚 Le toucher et la texture</label>
+      <div class="cg" id="g-toucher"></div>
+      <input type="text" id="contact-info" placeholder="Ce que je n'aime pas qu'on fasse sans me prévenir…" style="margin-top:10px">
+    </div>
+    <div class="qb">
+      <label class="ql">👃 Les odeurs et les goûts</label>
+      <div class="cg" id="g-odeurs"></div>
+      <input type="text" id="odeurs-info" placeholder="Odeurs ou aliments difficiles…" style="margin-top:10px">
+    </div>
+    <div class="qb">
+      <label class="ql">🏃 Le mouvement et l'espace</label>
+      <div class="cg" id="g-mouvement"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(4)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(6)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ COMMUNICATION ═══ -->
+<div class="sec" id="s6">
+  <div class="sh" style="background:var(--violet)">
+    <span class="em">💬</span>
+    <h2>Ma communication</h2>
+    <p>Comment tu préfères échanger avec les autres.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">Mon mode préféré pour échanger</label>
+      <div class="cg" id="g-mode-comm"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce qui m'aide dans une conversation</label>
+      <div class="cg" id="g-aide-comm"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce que je trouve difficile dans les échanges</label>
+      <div class="cg" id="g-diff-comm"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">La meilleure façon d'entrer en contact avec moi</label>
+      <textarea id="contact-best" rows="2" placeholder="Ex : par message écrit, en fin d'après-midi, ne pas appeler sans prévenir…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Quand je suis en surcharge, on peut le voir parce que…</label>
+      <textarea id="surcharge" rows="2" placeholder="Ex : je deviens silencieux·se, je réponds par monosyllabes, je me retire…"></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(5)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(7)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ ENERGIE ═══ -->
+<div class="sec" id="s7">
+  <div class="sh" style="background:var(--green)">
+    <span class="em">🔋</span>
+    <h2>Mon énergie et mon rythme</h2>
+    <p>Ce qui te recharge, ce qui t'épuise, comment tu récupères.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">✅ Ce qui me recharge</label>
+      <div class="cg" id="g-recharge"></div>
+      <input type="text" id="recharge-autre" placeholder="Autre chose…" style="margin-top:10px">
+    </div>
+    <div class="qb">
+      <label class="ql">⚠️ Ce qui m'épuise</label>
+      <div class="cg" id="g-epuise"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">Après une interaction sociale, j'ai besoin de…</label>
+      <div class="cg c1" id="g-recup"></div>
+    </div>
+    <div class="qb">
+      <label class="ql">Mes moments préférés pour interagir</label>
+      <div class="cg" id="g-moments"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(6)">← Précédent</button>
+    <button class="btn btn-next" onclick="goTo(8)">Suivant →</button>
+  </div>
+</div>
+
+<!-- ═══ ESSENTIEL ═══ -->
+<div class="sec" id="s8">
+  <div class="sh" style="background:var(--teal-d)">
+    <span class="em">💡</span>
+    <h2>L'essentiel pour bien interagir avec moi</h2>
+    <p>La partie la plus importante. Réponds à ce qui te parle.</p>
+  </div>
+  <div class="sb">
+    <div class="qb">
+      <label class="ql">Une chose que j'aimerais que les gens comprennent sur mon fonctionnement</label>
+      <textarea id="comprendre" rows="3" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce que les autres font par gentillesse mais qui me complique la vie</label>
+      <textarea id="gentillesse" rows="2" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Comment JE sais que je suis à l'aise avec quelqu'un</label>
+      <textarea id="alaise" rows="2" placeholder="Ex : je parle plus spontanément, je fais des blagues, je pose des questions…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Ce dont j'ai besoin pour me sentir en sécurité dans un lieu ou un groupe</label>
+      <textarea id="securite" rows="2" placeholder="…"></textarea>
+    </div>
+    <div class="qb">
+      <label class="ql">Une dernière chose à ajouter <span class="qopt">facultatif</span></label>
+      <textarea id="derniere" rows="2" placeholder="…"></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(7)">← Précédent</button>
+    <button class="btn btn-gen" onclick="goTo(9)">Générer mon document ✨</button>
+  </div>
+</div>
+
+<!-- ═══ FINAL ═══ -->
+<div class="sec" id="s9">
+  <div class="final-hdr">
+    <span>✨</span>
+    <h2>C'est prêt ! Choisis ton format.</h2>
+  </div>
+  <div class="final-body">
+    <button class="gbtn gbtn-carte" onclick="genPDF('carte')">🃏 Carte courte — A5, à imprimer et plastifier</button>
+    <button class="gbtn gbtn-detail" onclick="genPDF('detail')">📄 Mode d'emploi détaillé — A4</button>
+    <button class="gbtn gbtn-both" onclick="genPDF('both')">📦 Télécharger les deux formats</button>
+    <div class="privacy">
+      🔒 <strong>Tes données restent sur ton appareil.</strong><br>
+      Le PDF est généré directement dans ton navigateur. Rien n'est envoyé ni stocké nulle part. Tu peux l'imprimer et le plastifier en toute autonomie.
+    </div>
+    <button class="restart-btn" onclick="goTo(0)">← Revenir au début et modifier mes réponses</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONTENU — modifier ici pour changer les options
+// ═══════════════════════════════════════════════════════
+const DATA = {
+  genre:['Femme','Homme','Non-binaire','Agenre (sans genre)','Genderfluid (genre fluide)',
+         'En exploration / je ne sais pas encore','Je préfère ne pas le préciser',
+         'Je ne souhaite pas afficher cette information','Autre :'],
+  pronoms:['Elle / la','Il / lui','Iel / ielle','Ol','Eux / leur',
+           'Pas de pronom spécifique','N\'importe lequel',
+           'Ça dépend du contexte ou de la personne',
+           'Je ne sais pas encore','Je préfère ne pas le préciser'],
+  genreAide:['Qu\'on utilise les bons pronoms sans faire de remarque',
+             'Qu\'on me demande si on ne sait pas',
+             'Qu\'on ne fasse pas de commentaire sur mon apparence ou mon genre',
+             'Qu\'on ne présuppose pas mon genre',
+             'Qu\'on n\'insiste pas si je n\'en parle pas',
+             'Qu\'on normalise la question des pronoms pour tout le monde'],
+  orientAfficher:['Oui, afficher cette information dans mon document',
+                  'Non, ne pas afficher cette information',
+                  'Je ne sais pas encore'],
+  son:['Les bruits forts me dérangent fortement','J\'ai besoin de silence pour me concentrer',
+       'Les bruits répétitifs m\'épuisent','Certains sons me font du bien',
+       'Filtrer les sons en groupe est très difficile pour moi',
+       'Un bruit de fond doux m\'aide à me concentrer'],
+  visuel:['Les lumières vives me gênent','Le mouvement visuel m\'épuise rapidement',
+          'Je préfère peu de stimulations visuelles à la fois','Les couleurs vives me perturbent',
+          'Les écrans prolongés me fatiguent vite','Les environnements visuellement riches me plaisent'],
+  toucher:['Certains tissus ou textures me gênent',
+           'J\'aime et j\'ai besoin de contact physique','Je n\'aime pas les contacts non annoncés',
+           'Les étiquettes de vêtements me dérangent','J\'ai besoin de toucher pour mieux comprendre',
+           'Le froid ou la chaleur me dérange facilement'],
+  odeurs:['Certaines odeurs me sont insupportables','Je suis très sensible aux odeurs de nourriture',
+          'Les parfums forts me dérangent','Je préfère les environnements sans odeur forte',
+          'Certaines textures alimentaires me sont impossibles','Des aliments que je ne peux pas manger'],
+  mouvement:['J\'ai besoin de bouger pour rester attentif·ve','Les espaces très bondés m\'épuisent',
+             'J\'ai besoin d\'espace personnel autour de moi','Les transports en commun m\'épuisent',
+             'J\'aime les environnements calmes et structurés','Je me balance ou bouge souvent sans m\'en rendre compte'],
+  modeComm:['À l\'oral, en face à face','Par message écrit (SMS, mail)','Par messages vocaux',
+            'En petits groupes de 2 à 3 personnes','En groupe de 4 personnes maximum',
+            'Par chat ou messagerie instantanée','J\'observe et écoute avant de parler'],
+  aideComm:['Qu\'on me laisse du temps pour répondre sans me presser',
+            'Qu\'on soit direct·e, clair·e et sans sous-entendus',
+            'Qu\'on explique les sous-entendus ou l\'implicite',
+            'Qu\'on me prévienne si le sujet ou le plan change',
+            'Qu\'on accepte mes silences sans les interpréter',
+            'Qu\'on m\'écrive plutôt que de me parler à l\'improviste',
+            'Qu\'on me demande avant tout contact physique',
+            'Des questions fermées avec réponse oui / non'],
+  diffComm:['Les conversations en grand groupe (plus de 4 personnes)',
+            'Le contact visuel prolongé — je peux écouter sans regarder',
+            'Le small talk — les conversations informelles sans but précis',
+            'Comprendre les blagues, l\'ironie ou le second degré',
+            'Répondre très vite sans avoir le temps de réfléchir',
+            'Les règles sociales non dites ou implicites',
+            'Savoir quand c\'est mon tour de prendre la parole',
+            'M\'exprimer en surcharge sensorielle',
+            'M\'exprimer en surcharge émotionnelle',
+            'M\'exprimer quand j\'ai une surcharge de parole (mutisme temporaire)'],
+  recharge:['La solitude et le silence','Ma passion principale',
+            'Le mouvement (marche, sport, danse…)','Mes rituels et routines habituelles',
+            'Un endroit ou un lieu précis qui me sécurise','La musique au casque',
+            'Une activité créative','Le contact avec des animaux',
+            'Des échanges en petit groupe avec des personnes de confiance',
+            'Ne rien faire et ne pas avoir à parler pendant un moment'],
+  epuise:['Les interactions sociales longues et intenses','Le bruit et l\'agitation',
+          'Les changements de plan à la dernière minute','Prendre des décisions rapides sous pression',
+          'Les endroits ou situations que je ne connais pas','Devoir masquer mon fonctionnement réel',
+          'Les conflits et les tensions entre personnes','Devoir expliquer qui je suis encore et encore',
+          'Les transitions — passer d\'une activité à une autre','Être observé·e, jugé·e ou évalué·e'],
+  recup:['Quelques minutes seul·e suffisent','Une heure ou plus seul·e',
+         'Une journée entière de repos','Ça dépend beaucoup de l\'intensité de l\'interaction'],
+  moments:['Le matin de préférence','L\'après-midi de préférence','Le soir de préférence',
+           'Pas de moment préféré particulier','Ça varie selon les jours et mon état'],
+};
+
+const LABELS=['Intro','Qui je suis','Genre','Orientation','Intérêts','Sensoriel','Comm.','Énergie','Essentiel','Générer'];
+let cur=0, iCount=3;
+
+// ── Sauvegarde temporaire anti-perte ──────────────────
+function saveState(){
+  const d=collectSafe();
+  try{sessionStorage.setItem('mde_backup',JSON.stringify(d));}catch(e){}
+}
+function loadState(){
+  try{
+    const s=sessionStorage.getItem('mde_backup');
+    if(!s)return;
+    const d=JSON.parse(s);
+    // restore text fields
+    const fields=['prenom','age','adresse','description','genre-autre','pronoms-autre',
+                  'genre-libre','orientation','orient-info','partager','napas',
+                  'sons-diff','sons-bien','contact-info','odeurs-info','contact-best',
+                  'surcharge','recharge-autre','comprendre','gentillesse','alaise','securite','derniere'];
+    fields.forEach(f=>{const el=document.getElementById(f);if(el&&d[f])el.value=d[f];});
+  }catch(e){}
+}
+// Auto-save on any input change
+document.addEventListener('input',()=>saveState());
+document.addEventListener('change',()=>saveState());
+
+window.addEventListener('DOMContentLoaded',()=>{
+  buildPills();
+  buildGrids();
+  buildInterestBlocks();
+  updatePills();
+  setTimeout(loadState, 100);
+});
+
+function buildPills(){
+  const c=document.getElementById('pills');
+  LABELS.forEach((l,i)=>{
+    const b=document.createElement('button');
+    b.className='pill'+(i===0?' active':'');
+    b.id='pill'+i;b.textContent=l;
+    b.onclick=()=>goTo(i);
+    c.appendChild(b);
+  });
+}
+
+function goTo(idx){
+  saveState();
+  document.getElementById('s'+cur).classList.remove('active');
+  cur=idx;
+  document.getElementById('s'+cur).classList.add('active');
+  updatePills();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updatePills(){
+  const pct=(cur/(LABELS.length-1))*100;
+  document.getElementById('pb').style.width=pct+'%';
+  LABELS.forEach((_,i)=>{
+    const p=document.getElementById('pill'+i);
+    p.className='pill'+(i===cur?' active':(i<cur?' done':''));
+  });
+}
+
+function mkGrid(id,opts,color){
+  const c=document.getElementById(id);
+  if(!c)return;
+  opts.forEach((o,i)=>{
+    const lbl=document.createElement('label');
+    lbl.className='ci '+color;
+    lbl.innerHTML=`<input type="checkbox" id="${id}-${i}"><span class="cb"></span><span class="cl">${o}</span>`;
+    lbl.querySelector('input').addEventListener('change',function(){
+      lbl.classList.toggle('checked',this.checked);
+      saveState();
+    });
+    c.appendChild(lbl);
+  });
+}
+
+function buildGrids(){
+  mkGrid('g-genre',DATA.genre,'violet');
+  mkGrid('g-pronoms',DATA.pronoms,'violet');
+  mkGrid('g-genre-aide',DATA.genreAide,'violet');
+  mkGrid('g-orient-afficher',DATA.orientAfficher,'violet');
+  mkGrid('g-son',DATA.son,'coral');
+  mkGrid('g-visuel',DATA.visuel,'coral');
+  mkGrid('g-toucher',DATA.toucher,'coral');
+  mkGrid('g-odeurs',DATA.odeurs,'coral');
+  mkGrid('g-mouvement',DATA.mouvement,'coral');
+  mkGrid('g-mode-comm',DATA.modeComm,'violet');
+  mkGrid('g-aide-comm',DATA.aideComm,'violet');
+  mkGrid('g-diff-comm',DATA.diffComm,'violet');
+  mkGrid('g-recharge',DATA.recharge,'green');
+  mkGrid('g-epuise',DATA.epuise,'coral');
+  mkGrid('g-recup',DATA.recup,'green');
+  mkGrid('g-moments',DATA.moments,'green');
+}
+
+function buildInterestBlocks(){
+  const w=document.getElementById('interests-wrap');
+  w.innerHTML='';
+  for(let i=0;i<iCount;i++)mkIBlock(i);
+}
+
+function addInterest(){
+  const w=document.getElementById('interests-wrap');
+  const btn=w.parentNode.querySelector('button');
+  const d=document.createElement('div');
+  d.className='iblock';d.id='ib'+iCount;
+  d.innerHTML=`
+    <label class="ql">Intérêt ${iCount+1}</label>
+    <input type="text" id="i-nom-${iCount}" placeholder="Nom de l'intérêt…" style="margin-bottom:11px">
+    <label class="ql" style="color:var(--gold);margin-top:8px">Intensité dans ta vie</label>
+    <div class="iscale" id="is-${iCount}" data-val="0">
+      ${[1,2,3,4,5].map(n=>`<button type="button" class="ibtn" onclick="selInt(${iCount},${n})">${n}</button>`).join('')}
+      <span style="font-size:.82rem;color:var(--grey-m);margin-left:5px">/ 5</span>
+    </div>
+    <div class="ilabels"><span>j'apprécie</span><span>c'est central dans ma vie</span></div>
+  `;
+  w.insertBefore(d,btn);
+  iCount++;
+}
+
+function mkIBlock(i){
+  const w=document.getElementById('interests-wrap');
+  const d=document.createElement('div');
+  d.className='iblock';d.id='ib'+i;
+  d.innerHTML=`
+    <label class="ql">Intérêt ${i+1}</label>
+    <input type="text" id="i-nom-${i}" placeholder="Nom de l'intérêt…" style="margin-bottom:11px">
+    <label class="ql" style="color:var(--gold);margin-top:8px">Intensité dans ta vie</label>
+    <div class="iscale" id="is-${i}" data-val="0">
+      ${[1,2,3,4,5].map(n=>`<button type="button" class="ibtn" onclick="selInt(${i},${n})">${n}</button>`).join('')}
+      <span style="font-size:.82rem;color:var(--grey-m);margin-left:5px">/ 5</span>
+    </div>
+    <div class="ilabels"><span>j'apprécie</span><span>c'est central dans ma vie</span></div>
+  `;
+  w.appendChild(d);
+}
+
+function selInt(idx,val){
+  const sc=document.getElementById('is-'+idx);
+  sc.dataset.val=val;
+  sc.querySelectorAll('.ibtn').forEach(b=>{
+    b.classList.toggle('sel',parseInt(b.textContent)<=val);
+  });
+  saveState();
+}
+
+function getChecked(id){
+  const c=document.getElementById(id);
+  if(!c)return[];
+  return Array.from(c.querySelectorAll('input:checked'))
+    .map(cb=>cb.closest('.ci').querySelector('.cl').textContent.trim());
+}
+
+function v(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+
+function collectSafe(){
+  const ints=[];
+  for(let i=0;i<iCount;i++){
+    const nom=v('i-nom-'+i);
+    const sc=document.getElementById('is-'+i);
+    const intensity=sc?sc.dataset.val:'0';
+    if(nom)ints.push({nom,intensity});
+  }
+  return{
+    prenom:v('prenom'),age:v('age'),adresse:v('adresse'),description:v('description'),
+    genre:getChecked('g-genre'),genreAutre:v('genre-autre'),
+    pronoms:getChecked('g-pronoms'),pronomsAutre:v('pronoms-autre'),
+    genreAide:getChecked('g-genre-aide'),genreLibre:v('genre-libre'),
+    orientation:v('orientation'),orientInfo:v('orient-info'),
+    orientAfficher:getChecked('g-orient-afficher'),
+    ints,partager:v('partager'),napas:v('napas'),
+    son:getChecked('g-son'),sonsDiff:v('sons-diff'),sonsBien:v('sons-bien'),
+    visuel:getChecked('g-visuel'),
+    toucher:getChecked('g-toucher'),contactInfo:v('contact-info'),
+    odeurs:getChecked('g-odeurs'),odeursInfo:v('odeurs-info'),
+    mouvement:getChecked('g-mouvement'),
+    modeComm:getChecked('g-mode-comm'),
+    aideComm:getChecked('g-aide-comm'),
+    diffComm:getChecked('g-diff-comm'),
+    contactBest:v('contact-best'),surcharge:v('surcharge'),
+    recharge:getChecked('g-recharge'),rechargeAutre:v('recharge-autre'),
+    epuise:getChecked('g-epuise'),
+    recup:getChecked('g-recup'),moments:getChecked('g-moments'),
+    comprendre:v('comprendre'),gentillesse:v('gentillesse'),
+    alaise:v('alaise'),securite:v('securite'),derniere:v('derniere'),
+  };
+}
+
+// ── PDF helpers ───────────────────────────────────────
+const C={
+  teal:'#2E8B80',tealD:'#1A5C55',tealL:'#E6F5F3',
+  coral:'#D95F50',coralL:'#FDECEA',
+  gold:'#B07A10',goldL:'#FDF5E0',
+  violet:'#5A4ABD',violetL:'#EEEAF8',
+  green:'#2E8A50',greenL:'#E8F5EE',
+  greyF:'#1A202C',greyM:'#4A5568',greyL:'#F7FAFC',greyB:'#A0AEC0',
+};
+function rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function rect(doc,x,y,w,h,col){const[r,g,b]=rgb(col);doc.setFillColor(r,g,b);doc.rect(x,y,w,h,'F');}
+function t(doc,tx,x,y,sz,col,st='normal',mw=null){
+  const[r,g,b]=rgb(col);doc.setTextColor(r,g,b);doc.setFontSize(sz);doc.setFont('helvetica',st);
+  if(mw)doc.text(tx,x,y,{maxWidth:mw});else doc.text(tx,x,y);
+}
+function blk(doc,y,PW,label,val,fill,bar,M){
+  if(!val||(Array.isArray(val)&&!val.length))return y;
+  const w=PW-M*2,BAR=4,P=5,tw=w-BAR-P*2;
+  const lines=Array.isArray(val)?val.map(v=>'• '+v):doc.splitTextToSize(String(val),tw);
+  const lh=4.8,h=lines.length*lh+P*2+8;
+  if(y+h>285){doc.addPage();y=14;}
+  rect(doc,M,y,BAR,h,bar);
+  rect(doc,M+BAR,y,w-BAR,h,fill);
+  const[lr,lg,lb]=rgb(bar);
+  doc.setTextColor(lr,lg,lb);doc.setFontSize(8);doc.setFont('helvetica','bold');
+  doc.text(label,M+BAR+P,y+P+3.5);
+  const[fr,fg,fb]=rgb(C.greyF);
+  doc.setTextColor(fr,fg,fb);doc.setFontSize(9);doc.setFont('helvetica','normal');
+  lines.forEach((l,i)=>doc.text(l,M+BAR+P,y+P+9+i*lh));
+  return y+h+4;
+}
+
+function genPDF(type){
+  const d=collectSafe();
+  if(type==='carte'||type==='both')genCarte(d);
+  if(type==='detail'||type==='both')genDetail(d);
+}
+
+function genCarte(d){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
+  const W=148,H=210,M=11;
+  let y=0;
+
+  // Header
+  rect(doc,0,0,W,24,C.tealD);
+  t(doc,"🧩 Mon mode d'emploi",M,11,14,C.tealL,'bold');
+  t(doc,'Carte de présentation · Création de Couleur',M,19,7.5,'#AAEAE7','italic');
+  y=28;
+
+  // Nom seul sur sa ligne
+  const nom=d.prenom||'Prénom';
+  t(doc,nom,M,y+8,16,C.tealD,'bold');
+  y+=12;
+
+  // Age sur ligne séparée
+  if(d.age){t(doc,d.age+' ans',M,y,9,C.greyM,'normal');y+=6;}
+
+  // Genre + pronoms sur lignes séparées
+  const gStr=[...d.genre,d.genreAutre].filter(Boolean).filter(s=>!s.includes('afficher')).join(', ');
+  const pStr=[...d.pronoms,d.pronomsAutre].filter(Boolean).filter(s=>!s.includes('préciser')).join(' / ');
+  if(gStr){t(doc,'Genre : '+gStr,M,y,8,C.greyM,'italic',W-M*2);y+=5;}
+  if(pStr){t(doc,'Pronoms : '+pStr,M,y,8,C.greyM,'italic',W-M*2);y+=5;}
+  y+=3;
+
+  if(d.ints.length){
+    const s=d.ints.map(i=>i.nom+(i.intensity&&i.intensity!=='0'?' ('+i.intensity+'/5)':'')).join(' · ');
+    y=blk(doc,y,W,'⭐ Ce qui me passionne',s,C.goldL,C.gold,M);
+  }
+  if(d.aideComm.length)y=blk(doc,y,W,'✅ Ce qui m\'aide',d.aideComm.slice(0,3),C.tealL,C.teal,M);
+  const sd=[...d.son,...d.toucher,...d.visuel].filter(Boolean).slice(0,3);
+  if(sd.length)y=blk(doc,y,W,'〰️ Ce qui me complique',sd,C.coralL,C.coral,M);
+  if(d.recharge.length)y=blk(doc,y,W,'🔋 Ma recharge',d.recharge.slice(0,2),C.greenL,C.green,M);
+  if(d.contactBest)y=blk(doc,y,W,'💬 Pour me contacter',d.contactBest,C.violetL,C.violet,M);
+  if(d.comprendre)y=blk(doc,y,W,'💡 Ce que j\'aimerais que tu saches',d.comprendre,C.tealL,C.tealD,M);
+
+  rect(doc,0,H-8,W,8,C.greyL);
+  t(doc,"Mon mode d'emploi · Création de Couleur",W/2,H-3,6.5,C.greyB,'normal');
+  doc.save('mode-emploi-carte-'+(d.prenom||'moi')+'.pdf');
+}
+
+function genDetail(d){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297,M=18;
+  let y=0;
+
+  rect(doc,0,0,W,28,C.tealD);
+  t(doc,"🧩 Mon mode d'emploi",M,12,18,C.tealL,'bold');
+  t(doc,'Mode d\'emploi détaillé · Création de Couleur',M,21,9,'#AAEAE7','italic');
+  y=33;
+
+  // Identité — blocs séparés sans chevauchement
+  rect(doc,M,y,W-M*2,26,C.tealL);
+  t(doc,d.prenom||'Prénom',M+5,y+8,15,C.tealD,'bold');
+  let iy=y+15;
+  if(d.age){t(doc,d.age+' ans',M+5,iy,9,C.greyM);iy+=5;}
+  const gStr=[...d.genre,d.genreAutre].filter(Boolean).filter(s=>!s.includes('afficher')).join(', ');
+  const pStr=[...d.pronoms,d.pronomsAutre].filter(Boolean).filter(s=>!s.includes('préciser')).join(' / ');
+  if(gStr){t(doc,'Genre : '+gStr,M+5,iy,8.5,C.greyM,'italic',W-M*2-10);iy+=5;}
+  if(pStr){t(doc,'Pronoms : '+pStr,M+5,iy,8.5,C.greyM,'italic',W-M*2-10);}
+  y+=30;
+
+  if(d.description){y=blk(doc,y,W,'',d.description,C.tealL,C.teal,M);}
+  y+=4;
+
+  // Orientation (si affiché)
+  const afficher=d.orientAfficher.join('');
+  const showOrient=!afficher.includes('Non');
+  if(showOrient&&(d.orientation||d.orientInfo)){
+    const ov=[d.orientation,d.orientInfo].filter(Boolean).join(' — ');
+    y=blk(doc,y,W,'💜 Orientation affective / romantique',ov,C.violetL,C.violet,M);
+    y+=2;
+  }
+
+  rect(doc,0,y,W,9,C.gold);t(doc,'⭐  Mes passions',M,y+6,10.5,C.tealL,'bold');y+=13;
+  d.ints.forEach(i=>{if(i.nom)y=blk(doc,y,W,i.nom+(i.intensity&&i.intensity!=='0'?' — '+i.intensity+'/5':''),null,C.goldL,C.gold,M);});
+  if(d.partager)y=blk(doc,y,W,'Ce que j\'aime partager',d.partager,C.goldL,C.gold,M);
+  if(d.napas)y=blk(doc,y,W,'Ce que je n\'aime pas',d.napas,C.coralL,C.coral,M);
+  y+=4;
+
+  if(y>240){doc.addPage();y=14;}
+  rect(doc,0,y,W,9,C.coral);t(doc,'〰️  Mon profil sensoriel',M,y+6,10.5,C.tealL,'bold');y+=13;
+  const sonA=[...d.son,d.sonsDiff?'Sons difficiles : '+d.sonsDiff:'',d.sonsBien?'Sons agréables : '+d.sonsBien:''].filter(Boolean);
+  if(sonA.length)y=blk(doc,y,W,'👂 Son et bruit',sonA,C.coralL,C.coral,M);
+  if(d.visuel.length)y=blk(doc,y,W,'💡 Lumière et visuel',d.visuel,C.coralL,C.coral,M);
+  const ta=[...d.toucher,d.contactInfo].filter(Boolean);
+  if(ta.length)y=blk(doc,y,W,'🤚 Toucher et contact',ta,C.coralL,C.coral,M);
+  const oa=[...d.odeurs,d.odeursInfo].filter(Boolean);
+  if(oa.length)y=blk(doc,y,W,'👃 Odeurs et goûts',oa,C.coralL,C.coral,M);
+  if(d.mouvement.length)y=blk(doc,y,W,'🏃 Mouvement et espace',d.mouvement,C.coralL,C.coral,M);
+  y+=4;
+
+  if(y>240){doc.addPage();y=14;}
+  rect(doc,0,y,W,9,C.violet);t(doc,'💬  Ma communication',M,y+6,10.5,C.tealL,'bold');y+=13;
+  if(d.modeComm.length)y=blk(doc,y,W,'Mon mode préféré',d.modeComm,C.violetL,C.violet,M);
+  if(d.aideComm.length)y=blk(doc,y,W,'Ce qui m\'aide',d.aideComm,C.violetL,C.violet,M);
+  if(d.diffComm.length)y=blk(doc,y,W,'Ce que je trouve difficile',d.diffComm,C.violetL,C.violet,M);
+  if(d.contactBest)y=blk(doc,y,W,'Pour me contacter',d.contactBest,C.violetL,C.violet,M);
+  if(d.surcharge)y=blk(doc,y,W,'Quand je suis en surcharge',d.surcharge,C.coralL,C.coral,M);
+  y+=4;
+
+  if(y>240){doc.addPage();y=14;}
+  rect(doc,0,y,W,9,C.green);t(doc,'🔋  Mon énergie et mon rythme',M,y+6,10.5,C.tealL,'bold');y+=13;
+  const ra=[...d.recharge,d.rechargeAutre].filter(Boolean);
+  if(ra.length)y=blk(doc,y,W,'✅ Ce qui me recharge',ra,C.greenL,C.green,M);
+  if(d.epuise.length)y=blk(doc,y,W,'⚠️ Ce qui m\'épuise',d.epuise,C.coralL,C.coral,M);
+  if(d.recup.length)y=blk(doc,y,W,'Temps de récupération',d.recup,C.greenL,C.green,M);
+  if(d.moments.length)y=blk(doc,y,W,'Mes moments préférés',d.moments,C.greenL,C.green,M);
+  y+=4;
+
+  if(y>230){doc.addPage();y=14;}
+  rect(doc,0,y,W,9,C.tealD);t(doc,'💡  Ce que j\'aimerais que tu saches',M,y+6,10.5,C.tealL,'bold');y+=13;
+  if(d.comprendre)y=blk(doc,y,W,'Pour comprendre mon fonctionnement',d.comprendre,C.tealL,C.tealD,M);
+  if(d.gentillesse)y=blk(doc,y,W,'Ce qui complique malgré la bonne intention',d.gentillesse,C.coralL,C.coral,M);
+  if(d.alaise)y=blk(doc,y,W,'Comment JE sais que je suis à l\'aise',d.alaise,C.greenL,C.green,M);
+  if(d.securite)y=blk(doc,y,W,'Ce dont j\'ai besoin pour me sentir en sécurité',d.securite,C.tealL,C.tealD,M);
+  if(d.derniere)y=blk(doc,y,W,'Une dernière chose',d.derniere,C.greyL,C.greyB,M);
+
+  const np=doc.internal.getNumberOfPages();
+  for(let p=1;p<=np;p++){
+    doc.setPage(p);
+    rect(doc,0,H-8,W,8,C.greyL);
+    doc.setFontSize(7);doc.setTextColor(160,160,160);doc.setFont('helvetica','normal');
+    doc.text("Mon mode d'emploi · Création de Couleur · "+p+'/'+np,W/2,H-3,{align:'center'});
+  }
+  doc.save('mode-emploi-detaille-'+(d.prenom||'moi')+'.pdf');
+}
+</script>
+</body>
+</html>
